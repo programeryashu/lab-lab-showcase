@@ -16,7 +16,7 @@ const leadsRef    = collection(db, 'showcase', 'community', 'leads');
 // ── Default values (used if Firestore is empty) ──────────────────
 const DEFAULT_SETTINGS = {
   projectName: 'Arora Lab',
-  tagline: 'Managed by Bob. Built for smarter development.',
+  tagline: 'Intelligent AI orchestration. Real-time device monitoring. One seamless ecosystem.',
   logoUrl: null,
   qrCodeUrl: null,
   workflowAnimated: true,
