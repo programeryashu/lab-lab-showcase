@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
-import { X, Settings, Users, Activity, QrCode, Upload, Plus, Trash2, Edit2, Check, Terminal, GitBranch, Cpu } from 'lucide-react';
+import { X, Settings, Users, QrCode, Upload, Plus, Trash2, Edit2, Check, Terminal, GitBranch, Cpu } from 'lucide-react';
 
-// ── Image Uploader ──────────────────────────────────────────────
+// ── Image Uploader ───────────────────────────────────────────────
 function ImageUploader({ value, onChange, label, hint }) {
   const ref = useRef();
   const handleFile = (e) => {
@@ -17,12 +17,10 @@ function ImageUploader({ value, onChange, label, hint }) {
     <div>
       <label className="block text-sm font-medium text-text mb-2">{label}</label>
       <div onClick={() => ref.current.click()}
-        className="border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center gap-3 cursor-pointer hover:border-primary/50 hover:bg-secondary/10 transition-all"
-      >
+        className="border-2 border-dashed border-border rounded-xl p-6 flex flex-col items-center gap-3 cursor-pointer hover:border-primary/50 hover:bg-secondary/10 transition-all">
         {value
           ? <img src={value} alt={label} className="max-h-32 rounded-lg object-contain" />
-          : <><Upload size={30} className="text-muted" /><p className="text-sm text-muted text-center">{hint}</p></>
-        }
+          : <><Upload size={30} className="text-muted" /><p className="text-sm text-muted text-center">{hint}</p></>}
         <input ref={ref} type="file" accept="image/*" className="hidden" onChange={handleFile} />
       </div>
       {value && <button onClick={() => onChange(null)} className="mt-2 text-xs text-red-500 hover:text-red-700">Remove</button>}
@@ -30,41 +28,48 @@ function ImageUploader({ value, onChange, label, hint }) {
   );
 }
 
-// ── General Tab ─────────────────────────────────────────────────
+// ── General Tab ──────────────────────────────────────────────────
 function GeneralTab() {
-  const { projectName, setProjectName, tagline, setTagline, logoUrl, setLogoUrl } = useApp();
+  const { projectName, tagline, logoUrl, setProjectName, setTagline, setLogoUrl } = useApp();
   const [name, setName] = useState(projectName);
   const [tag, setTag] = useState(tagline);
+  const [saved, setSaved] = useState(false);
+
+  const save = async () => {
+    await setProjectName(name);
+    await setTagline(tag);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
   return (
     <div className="space-y-5">
       <div>
         <label className="block text-sm font-medium text-text mb-1.5">Project Name</label>
         <input value={name} onChange={e => setName(e.target.value)}
-          className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-text text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-          placeholder="Arora Lab" />
+          className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-text text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
       </div>
       <div>
         <label className="block text-sm font-medium text-text mb-1.5">Tagline</label>
         <input value={tag} onChange={e => setTag(e.target.value)}
-          className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-text text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-          placeholder="Managed by Bob..." />
+          className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-text text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
       </div>
       <ImageUploader value={logoUrl} onChange={setLogoUrl} label="Logo Image" hint="Click to upload logo from your device" />
-      <button onClick={() => { setProjectName(name); setTagline(tag); }}
-        className="px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-accent transition-all shadow-md">
-        Save Changes
+      <button onClick={save}
+        className={`px-6 py-3 rounded-xl font-semibold transition-all shadow-md ${saved ? 'bg-emerald-500 text-white' : 'bg-primary text-white hover:bg-accent'}`}>
+        {saved ? '✓ Saved to Firebase' : 'Save Changes'}
       </button>
     </div>
   );
 }
 
-// ── Team Tab ────────────────────────────────────────────────────
+// ── Edit Member Form ─────────────────────────────────────────────
 function EditForm({ member, onSave, onCancel }) {
   const [d, setD] = useState({ ...member });
   return (
     <div className="space-y-2 mt-2">
       {['name', 'role', 'description', 'contribution'].map(f => (
-        <input key={f} type="text" placeholder={f.charAt(0).toUpperCase() + f.slice(1)} value={d[f]}
+        <input key={f} type="text" placeholder={f.charAt(0).toUpperCase() + f.slice(1)} value={d[f] || ''}
           onChange={e => setD({ ...d, [f]: e.target.value })}
           className="w-full bg-white border border-border rounded-lg px-3 py-2 text-sm text-text focus:outline-none focus:border-primary transition-all" />
       ))}
@@ -76,15 +81,19 @@ function EditForm({ member, onSave, onCancel }) {
   );
 }
 
+// ── Team Tab ─────────────────────────────────────────────────────
 function TeamTab() {
-  const { team, setTeam } = useApp();
-  const [editIdx, setEditIdx] = useState(null);
+  const { team, addTeamMember, updateTeamMember, removeTeamMember } = useApp();
+  const [editId, setEditId] = useState(null);
   const [adding, setAdding] = useState(false);
   const [nw, setNw] = useState({ name: '', role: '', description: '', contribution: '' });
 
-  const save = (i, d) => { const t = [...team]; t[i] = { ...t[i], ...d }; setTeam(t); setEditIdx(null); };
-  const remove = (id) => setTeam(team.filter(m => m.id !== id));
-  const add = () => { if (!nw.name) return; setTeam([...team, { ...nw, id: Date.now() }]); setNw({ name: '', role: '', description: '', contribution: '' }); setAdding(false); };
+  const add = async () => {
+    if (!nw.name.trim()) return;
+    await addTeamMember(nw);
+    setNw({ name: '', role: '', description: '', contribution: '' });
+    setAdding(false);
+  };
 
   return (
     <div className="space-y-3">
@@ -106,17 +115,17 @@ function TeamTab() {
                 className="w-full bg-white border border-border rounded-lg px-3 py-2 text-sm text-text focus:outline-none focus:border-primary transition-all" />
             ))}
             <div className="flex gap-2">
-              <button onClick={add} className="px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-accent transition-all">Add</button>
+              <button onClick={add} className="px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-accent">Add</button>
               <button onClick={() => setAdding(false)} className="px-4 py-2 bg-surface border border-border text-text text-sm rounded-lg">Cancel</button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {team.map((m, i) => (
+      {team.map((m) => (
         <div key={m.id} className="bg-surface border border-border rounded-xl p-4">
-          {editIdx === i
-            ? <EditForm member={m} onSave={(d) => save(i, d)} onCancel={() => setEditIdx(null)} />
+          {editId === m.id
+            ? <EditForm member={m} onSave={async (d) => { await updateTeamMember(m.id, d); setEditId(null); }} onCancel={() => setEditId(null)} />
             : <div className="flex items-start justify-between">
                 <div>
                   <p className="font-semibold text-text">{m.name}</p>
@@ -125,13 +134,57 @@ function TeamTab() {
                   <span className="text-xs bg-secondary/30 border border-border px-2 py-0.5 rounded-full mt-1.5 inline-block">{m.contribution}</span>
                 </div>
                 <div className="flex gap-1.5">
-                  <button onClick={() => setEditIdx(i)} className="p-1.5 text-muted hover:text-primary transition-colors"><Edit2 size={15} /></button>
-                  <button onClick={() => remove(m.id)} className="p-1.5 text-muted hover:text-red-500 transition-colors"><Trash2 size={15} /></button>
+                  <button onClick={() => setEditId(m.id)} className="p-1.5 text-muted hover:text-primary transition-colors"><Edit2 size={15} /></button>
+                  <button onClick={() => removeTeamMember(m.id)} className="p-1.5 text-muted hover:text-red-500 transition-colors"><Trash2 size={15} /></button>
                 </div>
               </div>
           }
         </div>
       ))}
+    </div>
+  );
+}
+
+// ── Tech Stack Tab ───────────────────────────────────────────────
+function TechStackTab() {
+  const { techStack, addTech, removeTech } = useApp();
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
+
+  const add = async () => {
+    if (!name.trim()) return;
+    await addTech({ name: name.trim(), category: category.trim() || 'Other' });
+    setName(''); setCategory('');
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="bg-secondary/20 border border-border rounded-xl p-4 space-y-3">
+        <p className="text-sm font-semibold text-text">Add Technology</p>
+        <div className="flex gap-2">
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="Name (e.g. Next.js)"
+            className="flex-1 bg-white border border-border rounded-lg px-3 py-2 text-sm text-text focus:outline-none focus:border-primary transition-all" />
+          <input value={category} onChange={e => setCategory(e.target.value)} placeholder="Category (e.g. Frontend)"
+            className="flex-1 bg-white border border-border rounded-lg px-3 py-2 text-sm text-text focus:outline-none focus:border-primary transition-all" />
+          <button onClick={add} className="px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-accent flex items-center gap-1">
+            <Plus size={15} /> Add
+          </button>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <p className="text-sm font-medium text-text">Current Stack ({techStack.length})</p>
+        {techStack.length === 0 && <p className="text-sm text-muted py-4 text-center">No technologies yet. Add one above.</p>}
+        {techStack.map(tech => (
+          <div key={tech.id} className="flex items-center justify-between bg-surface border border-border rounded-xl px-4 py-3">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-primary"></div>
+              <span className="text-sm font-semibold text-text">{tech.name}</span>
+              <span className="text-xs text-muted">{tech.category}</span>
+            </div>
+            <button onClick={() => removeTech(tech.id)} className="p-1.5 text-muted hover:text-red-500 transition-colors"><Trash2 size={15} /></button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -143,7 +196,7 @@ function WorkflowTab() {
     <div className="space-y-6">
       <div>
         <h3 className="font-semibold text-text mb-1">Workflow Animations</h3>
-        <p className="text-sm text-muted mb-4">Enable animated entrance effects and a live data-flow indicator on the Architecture section.</p>
+        <p className="text-sm text-muted mb-4">Enable animated entrance effects and live data-flow indicator on the Architecture section.</p>
         <div className="flex items-center gap-4">
           <button onClick={() => setWorkflowAnimated(!workflowAnimated)}
             className={`relative w-14 h-7 rounded-full transition-colors ${workflowAnimated ? 'bg-primary' : 'bg-border'}`}>
@@ -151,6 +204,7 @@ function WorkflowTab() {
           </button>
           <span className="text-sm font-medium text-text">{workflowAnimated ? 'Animations ON' : 'Animations OFF'}</span>
         </div>
+        <p className="text-xs text-muted mt-3">This setting is saved to Firebase and persists across sessions.</p>
       </div>
     </div>
   );
@@ -174,53 +228,31 @@ function QRCodeTab() {
   );
 }
 
-// ── Tech Stack Tab ──────────────────────────────────────────────
-function TechStackTab() {
-  const { techStack, setTechStack } = useApp();
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
-
-  const add = () => {
-    if (!name.trim()) return;
-    setTechStack([...techStack, { id: Date.now(), name: name.trim(), category: category.trim() || 'Other' }]);
-    setName(''); setCategory('');
-  };
-
-  const remove = (id) => setTechStack(techStack.filter(t => t.id !== id));
-
+// ── Leads Tab ────────────────────────────────────────────────────
+function LeadsTab() {
+  const { leads } = useApp();
   return (
-    <div className="space-y-5">
-      {/* Add form */}
-      <div className="bg-secondary/20 border border-border rounded-xl p-4 space-y-3">
-        <p className="text-sm font-semibold text-text">Add Technology</p>
-        <div className="flex gap-2">
-          <input value={name} onChange={e => setName(e.target.value)} placeholder="Name (e.g. Next.js)"
-            className="flex-1 bg-white border border-border rounded-lg px-3 py-2 text-sm text-text focus:outline-none focus:border-primary transition-all" />
-          <input value={category} onChange={e => setCategory(e.target.value)} placeholder="Category (e.g. Frontend)"
-            className="flex-1 bg-white border border-border rounded-lg px-3 py-2 text-sm text-text focus:outline-none focus:border-primary transition-all" />
-          <button onClick={add}
-            className="px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-accent transition-all flex items-center gap-1">
-            <Plus size={15} /> Add
-          </button>
-        </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold text-text">Community Leads ({leads.length})</h3>
       </div>
-
-      {/* List */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-text">Current Stack ({techStack.length})</p>
-        {techStack.length === 0 && <p className="text-sm text-muted py-4 text-center">No technologies. Add one above.</p>}
-        {techStack.map(tech => (
-          <div key={tech.id} className="flex items-center justify-between bg-surface border border-border rounded-xl px-4 py-3">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-primary"></div>
+      <div className="grid gap-3">
+        {leads.length === 0 && <p className="text-sm text-muted py-8 text-center bg-surface border border-dashed border-border rounded-xl">No leads yet. Share your lab to get some!</p>}
+        {leads.map((lead) => (
+          <div key={lead.id} className="bg-surface border border-border rounded-xl p-4 flex items-center justify-between group hover:border-primary/30 transition-all">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                {lead.name?.charAt(0).toUpperCase()}
+              </div>
               <div>
-                <span className="text-sm font-semibold text-text">{tech.name}</span>
-                <span className="ml-2 text-xs text-muted">{tech.category}</span>
+                <p className="font-semibold text-text">{lead.name}</p>
+                <p className="text-xs text-muted">{lead.email}</p>
               </div>
             </div>
-            <button onClick={() => remove(tech.id)} className="p-1.5 text-muted hover:text-red-500 transition-colors">
-              <Trash2 size={15} />
-            </button>
+            <div className="text-right">
+              <p className="text-[10px] uppercase tracking-wider text-muted font-bold">Joined</p>
+              <p className="text-xs text-text">{lead.timestamp?.toDate ? new Date(lead.timestamp.toDate()).toLocaleDateString() : 'Just now'}</p>
+            </div>
           </div>
         ))}
       </div>
@@ -234,13 +266,18 @@ const TABS = [
   { id: 'team',      label: 'Team',       icon: <Users size={16} /> },
   { id: 'techstack', label: 'Tech Stack', icon: <Cpu size={16} /> },
   { id: 'workflow',  label: 'Workflow',   icon: <GitBranch size={16} /> },
-  { id: 'qrcode',    label: 'QR Code',   icon: <QrCode size={16} /> },
+  { id: 'qrcode',    label: 'QR Code',    icon: <QrCode size={16} /> },
+  { id: 'leads',     label: 'Leads',      icon: <Users size={16} /> },
 ];
 
 export default function AdminDashboard() {
   const { setAdminOpen } = useApp();
   const [activeTab, setActiveTab] = useState('general');
-  const content = { general: <GeneralTab />, team: <TeamTab />, techstack: <TechStackTab />, workflow: <WorkflowTab />, qrcode: <QRCodeTab /> };
+  const content = {
+    general: <GeneralTab />, team: <TeamTab />,
+    techstack: <TechStackTab />, workflow: <WorkflowTab />, qrcode: <QRCodeTab />,
+    leads: <LeadsTab />,
+  };
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
@@ -266,6 +303,10 @@ export default function AdminDashboard() {
             ))}
           </nav>
           <div className="p-3 border-t border-border">
+            <div className="flex items-center gap-2 px-3 py-2 text-xs text-emerald-600">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              Firebase Connected
+            </div>
             <button onClick={() => setAdminOpen(false)} className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-muted hover:text-red-500 hover:bg-red-50 transition-all">
               <X size={15} /> Close Panel
             </button>
@@ -277,7 +318,7 @@ export default function AdminDashboard() {
           <div className="p-6 border-b border-border flex items-center justify-between">
             <div>
               <h2 className="text-lg font-bold text-text">{TABS.find(t => t.id === activeTab)?.label}</h2>
-              <p className="text-sm text-muted">Manage your Arora Lab showcase</p>
+              <p className="text-sm text-muted">Changes auto-save to Firebase Firestore</p>
             </div>
             <button onClick={() => setAdminOpen(false)} className="p-2 text-muted hover:text-text rounded-lg hover:bg-surface transition-colors"><X size={20} /></button>
           </div>

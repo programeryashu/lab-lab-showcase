@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Terminal, Activity, Zap } from 'lucide-react';
+import { Terminal, Activity, Zap, Users } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function Hero() {
-  const { projectName, tagline, logoUrl } = useApp();
+  const { projectName, tagline, logoUrl, leadsCount } = useApp();
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-background">
       <div className="absolute inset-0 z-0">
@@ -14,14 +14,20 @@ export default function Hero() {
       </div>
       <div className="container mx-auto px-6 relative z-10">
         <div className="text-center max-w-4xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-border shadow-sm mb-8">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
-            </span>
-            <span className="text-sm font-semibold text-primary">Powered by Bob</span>
-          </motion.div>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+              className="flex items-center gap-3 mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-border shadow-sm">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+                </span>
+                <span className="text-sm font-semibold text-primary">Powered by Bob</span>
+              </div>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-border shadow-sm">
+                <Users size={14} className="text-text" />
+                <span className="text-sm font-semibold text-text">{leadsCount} Lab Members</span>
+              </div>
+            </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.05 }}
             className="flex items-center justify-center gap-4 mb-4">

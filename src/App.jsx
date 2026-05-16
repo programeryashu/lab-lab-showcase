@@ -10,6 +10,7 @@ import Team from './components/Team';
 import TechStack from './components/TechStack';
 import AdminPanel from './components/AdminPanel';
 import QRCodeSection from './components/QRCodeSection';
+import Community from './components/Community';
 import Footer from './components/Footer';
 import AdminDashboard from './components/AdminDashboard';
 
@@ -27,6 +28,7 @@ function AppContent() {
         <TechStack />
         <AdminPanel />
         <QRCodeSection />
+        <Community />
       </main>
       <Footer />
       <AnimatePresence>{adminOpen && <AdminDashboard />}</AnimatePresence>
