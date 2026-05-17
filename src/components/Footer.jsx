@@ -16,7 +16,7 @@ export default function Footer() {
             <span className="text-xl font-bold tracking-tight text-text">{projectName}</span>
           </div>
           <div className="flex flex-wrap justify-center gap-8 text-sm text-muted">
-            {['About','Agents','Architecture','Team','Admin'].map(item => (
+            {['About','Agents','Architecture','Team','Goals','Admin'].map(item => (
               <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-primary transition-colors">{item}</a>
             ))}
           </div>

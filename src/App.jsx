@@ -8,6 +8,7 @@ import Agents from './components/Agents';
 import Architecture from './components/Architecture';
 import Team from './components/Team';
 import TechStack from './components/TechStack';
+import FutureGoals from './components/FutureGoals';
 import AdminPanel from './components/AdminPanel';
 import QRCodeSection from './components/QRCodeSection';
 import Community from './components/Community';
@@ -26,6 +27,7 @@ function AppContent() {
         <Architecture />
         <Team />
         <TechStack />
+        <FutureGoals />
         <AdminPanel />
         <QRCodeSection />
         <Community />

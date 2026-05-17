@@ -4,7 +4,7 @@ import { Users, Send, CheckCircle, Globe } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function Community() {
-  const { leadsCount, addLead } = useApp();
+  const { leadsCount, addLead, web3formsKey } = useApp();
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -15,7 +15,36 @@ export default function Community() {
     if (!email || !name) return;
     setLoading(true);
     try {
+      // Save locally to Firebase
       await addLead(email, name);
+
+      // Submit to Web3Forms if access key is set
+      if (web3formsKey) {
+        try {
+          const response = await fetch("https://api.web3forms.com/submit", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              access_key: web3formsKey,
+              name: name,
+              email: email,
+              subject: "New Early Access Lead - Arora Lab",
+              message: `A new member has signed up for early access.\n\nName: ${name}\nEmail: ${email}\n\nThis lead has been saved to your Firestore database.`,
+              from_name: "Arora Lab Showcase",
+            }),
+          });
+          const res = await response.json();
+          if (!res.success) {
+            console.warn("Web3Forms error response:", res.message);
+          }
+        } catch (apiErr) {
+          console.error("Web3Forms submit error:", apiErr);
+        }
+      }
+
       setSubmitted(true);
       setEmail('');
       setName('');
@@ -126,7 +155,7 @@ export default function Community() {
                     </button>
                   </form>
                   <p className="mt-6 text-xs text-center text-muted">
-                    No spam. Just technical updates from Bob. Powered by Firebase.
+                    No spam. Just technical updates from Bob. Powered by Firebase {web3formsKey ? '& Web3Forms' : ''}.
                   </p>
                 </motion.div>
               ) : (

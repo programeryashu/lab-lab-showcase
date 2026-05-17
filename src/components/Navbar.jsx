@@ -57,7 +57,7 @@ export default function Navbar() {
               <span className="text-xl font-bold tracking-tight text-text">{projectName}</span>
             </div>
             <div className="hidden md:flex items-center gap-8">
-              {['About','Agents','Architecture','Team','Community'].map(item => (
+              {['About','Agents','Architecture','Team','Goals','Community'].map(item => (
                 <a key={item} href={`#${item.toLowerCase()}`} className="text-sm font-medium text-muted hover:text-text transition-colors">{item}</a>
               ))}
             </div>
@@ -68,7 +68,7 @@ export default function Navbar() {
         </div>
         {mobileOpen && (
           <div className="md:hidden bg-white border-b border-border px-6 py-4 space-y-3 shadow-lg">
-            {['About','Agents','Architecture','Team','Community'].map(item => (
+            {['About','Agents','Architecture','Team','Goals','Community'].map(item => (
               <a key={item} href={`#${item.toLowerCase()}`} className="block text-muted hover:text-text py-2" onClick={() => setMobileOpen(false)}>{item}</a>
             ))}
           </div>

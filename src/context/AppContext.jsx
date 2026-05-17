@@ -20,6 +20,7 @@ const DEFAULT_SETTINGS = {
   logoUrl: null,
   qrCodeUrl: null,
   workflowAnimated: true,
+  web3formsKey: '96b25534-da9a-4e2d-b926-8b838feeb8bf',
 };
 
 const DEFAULT_TEAM = [
@@ -44,6 +45,14 @@ async function seedIfEmpty() {
     await setDoc(settingsRef, DEFAULT_SETTINGS);
     for (const m of DEFAULT_TEAM) await addDoc(teamRef, m);
     for (const t of DEFAULT_TECH)  await addDoc(techRef, t);
+  } else {
+    // Auto-migration: if settings already exist but web3formsKey is missing/empty, update it
+    const data = snap.data();
+    if (!data.web3formsKey || data.web3formsKey === '') {
+      await updateDoc(settingsRef, {
+        web3formsKey: '96b25534-da9a-4e2d-b926-8b838feeb8bf'
+      });
+    }
   }
 }
 
@@ -53,6 +62,7 @@ export function AppProvider({ children }) {
   const [team, setTeam] = useState([]);
   const [techStack, setTechStack] = useState([]);
   const [leadsCount, setLeadsCount] = useState(0);
+  const [leads, setLeads] = useState([]);
   const [adminOpen, setAdminOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -68,6 +78,7 @@ export function AppProvider({ children }) {
   const setLogoUrl          = (v) => updateSettings({ logoUrl: v });
   const setQrCodeUrl        = (v) => updateSettings({ qrCodeUrl: v });
   const setWorkflowAnimated = (v) => updateSettings({ workflowAnimated: v });
+  const setWeb3formsKey     = (v) => updateSettings({ web3formsKey: v });
 
   // Team CRUD
   const addTeamMember    = async (data)       => { const ref = await addDoc(teamRef, data); return ref.id; };
@@ -102,6 +113,7 @@ export function AppProvider({ children }) {
 
     const unsubLeads = onSnapshot(leadsRef, (snap) => {
       setLeadsCount(snap.size);
+      setLeads(snap.docs.map(d => ({ id: d.id, ...d.data() })));
     });
 
     return () => { unsubSettings(); unsubTeam(); unsubTech(); unsubLeads(); };
@@ -109,10 +121,10 @@ export function AppProvider({ children }) {
 
   const ctx = {
     ...settings,
-    setProjectName, setTagline, setLogoUrl, setQrCodeUrl, setWorkflowAnimated,
+    setProjectName, setTagline, setLogoUrl, setQrCodeUrl, setWorkflowAnimated, setWeb3formsKey,
     team,      addTeamMember, updateTeamMember, removeTeamMember,
     techStack, addTech, removeTech,
-    leadsCount, addLead,
+    leadsCount, leads, addLead,
     adminOpen, setAdminOpen,
     loading,
   };

@@ -30,14 +30,22 @@ function ImageUploader({ value, onChange, label, hint }) {
 
 // ── General Tab ──────────────────────────────────────────────────
 function GeneralTab() {
-  const { projectName, tagline, logoUrl, setProjectName, setTagline, setLogoUrl } = useApp();
+  const { projectName, tagline, logoUrl, web3formsKey, setProjectName, setTagline, setLogoUrl, setWeb3formsKey } = useApp();
   const [name, setName] = useState(projectName);
   const [tag, setTag] = useState(tagline);
+  const [web3Key, setWeb3Key] = useState(web3formsKey || '');
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setName(projectName);
+    setTag(tagline);
+    setWeb3Key(web3formsKey || '');
+  }, [projectName, tagline, web3formsKey]);
 
   const save = async () => {
     await setProjectName(name);
     await setTagline(tag);
+    await setWeb3formsKey(web3Key);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -53,6 +61,14 @@ function GeneralTab() {
         <label className="block text-sm font-medium text-text mb-1.5">Tagline</label>
         <input value={tag} onChange={e => setTag(e.target.value)}
           className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-text text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-text mb-1.5">Web3Forms Access Key</label>
+        <input value={web3Key} onChange={e => setWeb3Key(e.target.value)} placeholder="e.g. 12345678-abcd-1234-abcd-1234567890ab"
+          className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-text text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all font-mono" />
+        <p className="text-xs text-muted mt-1.5 leading-relaxed">
+          Used to receive contact/lead form submissions directly to your email. Get a free key at <a href="https://web3forms.com/" target="_blank" rel="noreferrer" className="text-primary hover:text-accent font-semibold underline transition-colors">web3forms.com</a>.
+        </p>
       </div>
       <ImageUploader value={logoUrl} onChange={setLogoUrl} label="Logo Image" hint="Click to upload logo from your device" />
       <button onClick={save}
