@@ -74,6 +74,7 @@ export function AppProvider({ children }) {
   const [leadsCount, setLeadsCount] = useState(0);
   const [leads, setLeads] = useState([]);
   const [adminOpen, setAdminOpen] = useState(false);
+  const [adminTab, setAdminTab] = useState('general');
   const [loading, setLoading] = useState(true);
 
   // Derived convenience setters that also write to Firestore
@@ -139,6 +140,7 @@ export function AppProvider({ children }) {
     techStack, addTech, removeTech,
     leadsCount, leads, addLead,
     adminOpen, setAdminOpen,
+    adminTab, setAdminTab,
     loading,
   };
 

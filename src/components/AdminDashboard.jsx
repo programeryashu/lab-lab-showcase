@@ -308,8 +308,9 @@ const TABS = [
 ];
 
 export default function AdminDashboard() {
-  const { setAdminOpen } = useApp();
-  const [activeTab, setActiveTab] = useState('general');
+  const { setAdminOpen, adminTab, setAdminTab } = useApp();
+  const activeTab = adminTab;
+  const setActiveTab = setAdminTab;
   const content = {
     general: <GeneralTab />, team: <TeamTab />,
     techstack: <TechStackTab />, workflow: <WorkflowTab />, qrcode: <QRCodeTab />,

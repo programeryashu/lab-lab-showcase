@@ -1,58 +1,17 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { QrCode, Upload, X, CheckCircle, Scan } from 'lucide-react';
+import { QrCode, Scan, ShieldAlert } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function QRUploadPanel() {
-  const { qrCodeUrl, setQrCodeUrl } = useApp();
-  const [isDragging, setIsDragging] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState(qrCodeUrl);
-  const [status, setStatus] = useState('idle'); // idle, uploading, success
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      processFile(file);
-    }
-  };
-
-  const handleFileInput = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      processFile(file);
-    }
-  };
-
-  const processFile = (file) => {
-    setStatus('uploading');
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const url = e.target.result;
-      setPreviewUrl(url);
-      setQrCodeUrl(url); // In a real app, you'd upload to storage first
-      setTimeout(() => setStatus('success'), 800);
-      setTimeout(() => setStatus('idle'), 3000);
-    };
-    reader.readAsDataURL(file);
-  };
+  const { qrCodeUrl, setAdminOpen, setAdminTab } = useApp();
 
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.6, delay: 0.4 }}
-      className="glass p-8 rounded-[2.5rem] relative overflow-hidden group"
+      className="glass p-8 rounded-[2.5rem] relative overflow-hidden group border border-border/40"
     >
       <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
         <QrCode size={120} />
@@ -65,92 +24,50 @@ export default function QRUploadPanel() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-text">Connectivity Hub</h3>
-            <p className="text-sm text-muted">Scan or upload to link device</p>
+            <p className="text-sm text-muted">Scan to link mobile device</p>
           </div>
         </div>
 
-        <div 
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          className={`
-            relative aspect-square rounded-3xl border-2 border-dashed transition-all duration-300
-            flex flex-col items-center justify-center gap-4 cursor-pointer overflow-hidden
-            ${isDragging ? 'border-primary bg-primary/5' : 'border-border bg-white/50 hover:bg-white/80'}
-          `}
-          onClick={() => document.getElementById('qr-upload').click()}
-        >
-          <input 
-            type="file" 
-            id="qr-upload" 
-            className="hidden" 
-            accept="image/*" 
-            onChange={handleFileInput}
-          />
-
+        <div className="relative aspect-square rounded-3xl border border-border/80 bg-white/40 overflow-hidden flex flex-col items-center justify-center gap-4 shadow-sm backdrop-blur-md">
           <AnimatePresence mode="wait">
-            {previewUrl ? (
+            {qrCodeUrl ? (
               <motion.div 
                 key="preview"
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
+                exit={{ opacity: 0, scale: 0.9 }}
                 className="relative w-full h-full p-6 flex flex-col items-center justify-center"
               >
                 <img 
-                  src={previewUrl} 
-                  alt="QR Preview" 
-                  className="w-full h-full object-contain rounded-xl shadow-inner"
+                  src={qrCodeUrl} 
+                  alt="QR Code" 
+                  className="w-full h-full object-contain rounded-xl shadow-inner bg-white p-2"
                 />
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setPreviewUrl(null);
-                    setQrCodeUrl(null);
-                  }}
-                  className="absolute top-4 right-4 p-2 bg-white/90 hover:bg-white rounded-full shadow-md text-muted hover:text-primary transition-colors"
-                >
-                  <X size={16} />
-                </button>
               </motion.div>
             ) : (
               <motion.div 
-                key="upload"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+                key="empty"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
                 className="flex flex-col items-center gap-3 text-center px-6"
               >
-                <div className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center text-primary mb-2">
-                  <Upload size={32} />
+                <div className="w-16 h-16 rounded-full bg-secondary/30 flex items-center justify-center text-primary/60 mb-2 border border-border">
+                  <ShieldAlert size={32} />
                 </div>
-                <p className="font-semibold text-text">Drop your QR code here</p>
-                <p className="text-sm text-muted">Supports PNG, JPG, or SVG. Direct from your phone.</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Status Overlay */}
-          <AnimatePresence>
-            {status !== 'idle' && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center gap-3 z-20"
-              >
-                {status === 'uploading' ? (
-                  <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-                ) : (
-                  <motion.div 
-                    initial={{ scale: 0 }} 
-                    animate={{ scale: 1 }} 
-                    className="flex flex-col items-center gap-2"
-                  >
-                    <CheckCircle size={48} className="text-primary" />
-                    <p className="font-bold text-text text-lg">QR Linked Successfully!</p>
-                  </motion.div>
-                )}
+                <p className="font-semibold text-text">Portal Offline</p>
+                <p className="text-sm text-muted leading-relaxed">
+                  No QR code uploaded yet. Please access the Admin dashboard to set up.
+                </p>
+                <button
+                  onClick={() => {
+                    setAdminTab('qrcode');
+                    setAdminOpen(true);
+                  }}
+                  className="mt-2 px-4 py-2 bg-primary hover:bg-accent text-white font-semibold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
+                >
+                  <QrCode size={14} /> Configure Portal
+                </button>
               </motion.div>
             )}
           </AnimatePresence>
@@ -158,15 +75,21 @@ export default function QRUploadPanel() {
 
         <div className="mt-6 space-y-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-muted">Live Status</span>
-            <span className="flex items-center gap-1.5 font-medium text-primary">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              Active Monitoring
-            </span>
+            <span className="text-muted">Portal Status</span>
+            <button 
+              onClick={() => {
+                setAdminTab('qrcode');
+                setAdminOpen(true);
+              }}
+              className="flex items-center gap-1.5 font-semibold text-primary hover:text-accent transition-colors"
+            >
+              <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${qrCodeUrl ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+              {qrCodeUrl ? 'Ready to Sync' : 'Setup Pending'}
+            </button>
           </div>
-          <button className="w-full py-3 rounded-2xl bg-secondary/30 text-text font-bold hover:bg-secondary/50 transition-all flex items-center justify-center gap-2 border border-border">
-            Generate New Link
-          </button>
+          <div className="text-[11px] text-muted text-center pt-2 border-t border-border/40">
+            Secure End-to-End Local Workspace Encryption
+          </div>
         </div>
       </div>
 
