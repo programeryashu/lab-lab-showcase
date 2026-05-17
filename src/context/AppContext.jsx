@@ -22,7 +22,7 @@ const DEFAULT_SETTINGS = {
   workflowAnimated: true,
   web3formsKey: '96b25534-da9a-4e2d-b926-8b838feeb8bf',
   visitButtonText: 'Click here to visit',
-  visitButtonUrl: 'https://aroralab.com',
+  visitButtonUrl: 'https://arora-os1.vercel.app',
 };
 
 const DEFAULT_TEAM = [
@@ -57,8 +57,8 @@ async function seedIfEmpty() {
     if (data.visitButtonText === undefined) {
       updates.visitButtonText = 'Click here to visit';
     }
-    if (data.visitButtonUrl === undefined) {
-      updates.visitButtonUrl = 'https://aroralab.com';
+    if (data.visitButtonUrl === undefined || data.visitButtonUrl === 'https://aroralab.com') {
+      updates.visitButtonUrl = 'https://arora-os1.vercel.app';
     }
     if (Object.keys(updates).length > 0) {
       await updateDoc(settingsRef, updates);

@@ -4,7 +4,7 @@ import { QrCode, Scan } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function QRCodeSection() {
-  const { qrCodeUrl, visitButtonUrl } = useApp();
+  const { qrCodeUrl, visitButtonUrl, visitButtonText } = useApp();
   return (
     <section className="py-32 bg-white" id="explore">
       <div className="container mx-auto px-6">
@@ -30,7 +30,7 @@ export default function QRCodeSection() {
           <div>
             <a href={visitButtonUrl || '#'} target="_blank" rel="noreferrer"
               className="px-8 py-4 rounded-xl bg-primary text-white font-semibold hover:bg-accent transition-all shadow-md hover:shadow-lg inline-flex items-center gap-2 mx-auto">
-              Open Live Showcase <Scan size={18} />
+              {visitButtonText || 'Open Live Showcase'} <Scan size={18} />
             </a>
           </div>
         </motion.div>
