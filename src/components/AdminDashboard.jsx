@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { X, Settings, Users, QrCode, Upload, Plus, Trash2, Edit2, Check, Terminal, GitBranch, Cpu } from 'lucide-react';
@@ -30,22 +30,33 @@ function ImageUploader({ value, onChange, label, hint }) {
 
 // ── General Tab ──────────────────────────────────────────────────
 function GeneralTab() {
-  const { projectName, tagline, logoUrl, web3formsKey, setProjectName, setTagline, setLogoUrl, setWeb3formsKey } = useApp();
+  const { 
+    projectName, tagline, logoUrl, web3formsKey, visitButtonText, visitButtonUrl,
+    setLogoUrl, updateSettings
+  } = useApp();
   const [name, setName] = useState(projectName);
   const [tag, setTag] = useState(tagline);
   const [web3Key, setWeb3Key] = useState(web3formsKey || '');
+  const [btnText, setBtnText] = useState(visitButtonText || '');
+  const [btnUrl, setBtnUrl] = useState(visitButtonUrl || '');
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     setName(projectName);
     setTag(tagline);
     setWeb3Key(web3formsKey || '');
-  }, [projectName, tagline, web3formsKey]);
+    setBtnText(visitButtonText || '');
+    setBtnUrl(visitButtonUrl || '');
+  }, [projectName, tagline, web3formsKey, visitButtonText, visitButtonUrl]);
 
   const save = async () => {
-    await setProjectName(name);
-    await setTagline(tag);
-    await setWeb3formsKey(web3Key);
+    await updateSettings({
+      projectName: name,
+      tagline: tag,
+      web3formsKey: web3Key,
+      visitButtonText: btnText,
+      visitButtonUrl: btnUrl,
+    });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -60,6 +71,16 @@ function GeneralTab() {
       <div>
         <label className="block text-sm font-medium text-text mb-1.5">Tagline</label>
         <input value={tag} onChange={e => setTag(e.target.value)}
+          className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-text text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-text mb-1.5">Visit Button Label Text</label>
+        <input value={btnText} onChange={e => setBtnText(e.target.value)} placeholder="e.g. Click here to visit"
+          className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-text text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-text mb-1.5">Visit Button URL Link</label>
+        <input value={btnUrl} onChange={e => setBtnUrl(e.target.value)} placeholder="e.g. https://aroralab.com"
           className="w-full bg-surface border border-border rounded-xl px-4 py-3 text-text text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" />
       </div>
       <div>

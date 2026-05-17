@@ -21,6 +21,8 @@ const DEFAULT_SETTINGS = {
   qrCodeUrl: null,
   workflowAnimated: true,
   web3formsKey: '96b25534-da9a-4e2d-b926-8b838feeb8bf',
+  visitButtonText: 'Click here to visit',
+  visitButtonUrl: 'https://aroralab.com',
 };
 
 const DEFAULT_TEAM = [
@@ -46,12 +48,20 @@ async function seedIfEmpty() {
     for (const m of DEFAULT_TEAM) await addDoc(teamRef, m);
     for (const t of DEFAULT_TECH)  await addDoc(techRef, t);
   } else {
-    // Auto-migration: if settings already exist but web3formsKey is missing/empty, update it
+    // Auto-migration: if settings already exist but fields are missing, update them
     const data = snap.data();
+    const updates = {};
     if (!data.web3formsKey || data.web3formsKey === '') {
-      await updateDoc(settingsRef, {
-        web3formsKey: '96b25534-da9a-4e2d-b926-8b838feeb8bf'
-      });
+      updates.web3formsKey = '96b25534-da9a-4e2d-b926-8b838feeb8bf';
+    }
+    if (data.visitButtonText === undefined) {
+      updates.visitButtonText = 'Click here to visit';
+    }
+    if (data.visitButtonUrl === undefined) {
+      updates.visitButtonUrl = 'https://aroralab.com';
+    }
+    if (Object.keys(updates).length > 0) {
+      await updateDoc(settingsRef, updates);
     }
   }
 }
@@ -79,6 +89,8 @@ export function AppProvider({ children }) {
   const setQrCodeUrl        = (v) => updateSettings({ qrCodeUrl: v });
   const setWorkflowAnimated = (v) => updateSettings({ workflowAnimated: v });
   const setWeb3formsKey     = (v) => updateSettings({ web3formsKey: v });
+  const setVisitButtonText  = (v) => updateSettings({ visitButtonText: v });
+  const setVisitButtonUrl   = (v) => updateSettings({ visitButtonUrl: v });
 
   // Team CRUD
   const addTeamMember    = async (data)       => { const ref = await addDoc(teamRef, data); return ref.id; };
@@ -122,6 +134,7 @@ export function AppProvider({ children }) {
   const ctx = {
     ...settings,
     setProjectName, setTagline, setLogoUrl, setQrCodeUrl, setWorkflowAnimated, setWeb3formsKey,
+    setVisitButtonText, setVisitButtonUrl, updateSettings,
     team,      addTeamMember, updateTeamMember, removeTeamMember,
     techStack, addTech, removeTech,
     leadsCount, leads, addLead,

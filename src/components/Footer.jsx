@@ -3,7 +3,7 @@ import { Terminal } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function Footer() {
-  const { projectName, logoUrl } = useApp();
+  const { projectName, logoUrl, setAdminOpen } = useApp();
   return (
     <footer className="border-t border-border bg-surface pt-14 pb-8">
       <div className="container mx-auto px-6">
@@ -17,7 +17,13 @@ export default function Footer() {
           </div>
           <div className="flex flex-wrap justify-center gap-8 text-sm text-muted">
             {['About','Agents','Architecture','Team','Goals','Admin'].map(item => (
-              <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-primary transition-colors">{item}</a>
+              item === 'Admin' ? (
+                <button key={item} onClick={() => setAdminOpen(true)} className="hover:text-primary transition-colors cursor-pointer bg-transparent border-none p-0 text-sm">
+                  {item}
+                </button>
+              ) : (
+                <a key={item} href={`#${item.toLowerCase()}`} className="hover:text-primary transition-colors">{item}</a>
+              )
             ))}
           </div>
         </div>

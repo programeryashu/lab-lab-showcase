@@ -5,7 +5,7 @@ import { useApp } from '../context/AppContext';
 import QRUploadPanel from './QRUploadPanel';
 
 export default function Hero() {
-  const { projectName, tagline, logoUrl, leadsCount } = useApp();
+  const { projectName, tagline, logoUrl, leadsCount, visitButtonText, visitButtonUrl } = useApp();
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-background">
       <div className="absolute inset-0 z-0">
@@ -55,9 +55,14 @@ export default function Hero() {
 
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.3 }}
               className="flex flex-col sm:flex-row items-center gap-4">
-              <button className="w-full sm:w-auto px-8 py-4 rounded-xl bg-primary text-white font-semibold hover:bg-accent transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
-                <Terminal size={20} /> Explore Workspace
-              </button>
+              <a 
+                href={visitButtonUrl || '#'} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto px-8 py-4 rounded-xl bg-primary text-white font-semibold hover:bg-accent transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-center"
+              >
+                <Terminal size={20} /> {visitButtonText || 'Explore Workspace'}
+              </a>
               <button className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white border border-border text-text font-semibold hover:bg-surface transition-all shadow-sm flex items-center justify-center gap-2">
                 <Activity size={20} /> System Status
               </button>
